@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data Catalog — OrphLux</title>
+<meta name="description" content="Browse OrphLux datasets and data projects for Generative AI, Physical AI and World Models — open samples directly.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%2316191a' d='M0 0h32v12h-7V7H7v18h18v-5h7v12H0z'/%3E%3Cpath fill='%23bc2f5e' d='M18 13h14v6H18z'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#16191a; --ink-2:#2f3431; --body:#4e554c; --muted:#6c7369;
+  --paper:#f4f5f1; --white:#fff; --line:#d5d8d1; --line-2:#e3e5e0; --line-3:#c9cdc5; --grid:#e8eae6;
+  --laser:#bc2f5e; --laser-ink:#fff8fb; --teal:#4f8f8a;
+  --nav-h:72px; --page-l:clamp(20px,6.67vw,96px); --page-r:clamp(20px,4.45vw,64px);
+  --sans:"IBM Plex Sans",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace; --display:"Archivo","IBM Plex Sans",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+html,body{overflow-x:clip}
+body{margin:0;font-family:var(--sans);color:var(--ink);background-color:var(--paper);
+  background-image:radial-gradient(var(--line-3) 1.2px,transparent 1.6px),linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:280px 200px,40px 40px,40px 40px;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+button{font:inherit;color:inherit}
+.mono{font-family:var(--mono);font-size:10px;letter-spacing:2.2px;text-transform:uppercase}
+:focus-visible{outline:2px solid var(--laser);outline-offset:2px}
+
+/* rail */
+.rail{position:fixed;left:0;top:0;bottom:0;width:40px;border-right:1px solid var(--line);background:var(--paper);z-index:40;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:14px 0}
+.rail span{writing-mode:vertical-rl;font-family:var(--mono);font-size:9px;letter-spacing:2.5px;color:var(--muted)}
+.rail .track{flex:1;width:1px;background:var(--line);margin:14px 0;position:relative}
+.rail .fill{position:absolute;left:-1px;top:0;width:3px;height:0;background:var(--teal)}
+
+/* nav */
+.nav{position:fixed;top:0;left:40px;right:0;height:var(--nav-h);background:rgba(244,245,241,.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);z-index:30;display:flex;align-items:center;justify-content:space-between;padding:0 var(--page-r) 0 calc(var(--page-l) - 40px)}
+.nav::after{content:"";position:absolute;left:0;bottom:-1px;height:2px;width:var(--prog,0%);background:linear-gradient(90deg,var(--laser),#cf6688 55%,var(--teal));transition:width .1s linear}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;font-family:var(--display);font-weight:800;font-size:24px;letter-spacing:.24px}
+.logo .accent{color:var(--laser)}
+.nav-links{display:flex;align-items:center;gap:28px;font-size:15px}
+.nav-links a{text-decoration:none;padding:6px 0;border-bottom:2px solid transparent}
+.nav-links a.active{border-color:var(--laser)}
+.nav-links a.btn{padding:10px 22px;border-bottom:1px solid var(--laser)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--laser);background:var(--laser);color:var(--laser-ink);padding:10px 22px;font-size:15px;font-weight:500;text-decoration:none;cursor:pointer;border-radius:0;transition:background .15s,color .15s}
+.btn:hover{background:#a3264f;border-color:#a3264f}
+.btn.ghost{background:var(--white);color:var(--ink);border-color:var(--line-3)}
+.btn.ghost:hover{border-color:var(--ink)}
+.btn.sm{padding:8px 14px;font-size:13px}
+
+main{padding-left:40px}
+.wrap{padding:0 var(--page-r) 0 calc(var(--page-l) - 40px)}
+
+/* hero */
+.hero{padding-top:calc(var(--nav-h) + clamp(48px,7vw,96px));padding-bottom:clamp(40px,5vw,64px)}
+.eyebrow{display:flex;align-items:center;gap:14px;font-family:var(--mono);font-size:11px;letter-spacing:2.2px;text-transform:uppercase}
+.eyebrow::before{content:"";width:28px;height:1px;background:var(--teal)}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(44px,7vw,84px);line-height:1;letter-spacing:-.025em;margin:26px 0 22px}
+h1 .accent,h2 .accent{color:var(--laser)}
+.lede{font-size:17px;line-height:1.65;color:var(--body);max-width:760px;margin:0}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid var(--ink);margin-top:44px;max-width:980px}
+.stat{padding:18px 18px 4px 0}
+.stat b{display:block;font-family:var(--display);font-weight:800;font-size:clamp(28px,3.4vw,40px);letter-spacing:-.02em}
+.stat span{color:var(--muted)}
+
+/* collection tabs */
+.tabs{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 28px}
+.tab{background:var(--white);border:1px solid var(--line-2);padding:12px 16px;cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);display:flex;gap:10px;align-items:center}
+.tab:hover{color:var(--ink);border-color:var(--line-3)}
+.tab[aria-selected=true]{color:var(--ink);border-color:var(--ink);box-shadow:inset 0 -2px 0 var(--laser)}
+.tab .n{color:var(--laser)}
+.tab .h{letter-spacing:1px;text-transform:none;color:var(--muted);opacity:.8}
+.also{margin-left:14px;font-size:13px;color:var(--muted)}
+.also button{background:none;border:0;padding:0;color:var(--laser);cursor:pointer;font-size:13px;text-decoration:underline;text-underline-offset:2px}
+.section-rule{display:flex;justify-content:space-between;border-top:1px solid #9aa096;padding:14px 0 0;color:var(--muted);margin-bottom:30px}
+
+/* layout */
+.catalog{display:grid;grid-template-columns:260px minmax(0,1fr);gap:clamp(20px,3vw,40px);padding-bottom:96px}
+#aside{position:sticky;top:calc(var(--nav-h) + 20px);align-self:start;max-height:calc(100vh - var(--nav-h) - 40px);overflow:auto;background:var(--white);border:1px solid var(--line)}
+.side-block{padding:16px 18px;border-bottom:1px solid var(--line-2)}
+.side-block:last-child{border-bottom:0}
+.side-title{color:var(--muted);margin-bottom:12px;display:block}
+.search{width:100%;border:1px solid var(--line-3);background:var(--paper);padding:10px 12px;font:14px var(--sans);border-radius:0}
+.search:focus{outline:none;border-color:var(--ink)}
+.cat-list{list-style:none;margin:0;padding:0}
+.cat-list button{width:100%;display:flex;justify-content:space-between;gap:10px;background:none;border:0;padding:7px 8px;text-align:left;cursor:pointer;font-size:13.5px;line-height:1.35;color:var(--ink-2)}
+.cat-list button:hover{background:var(--paper)}
+.cat-list button[aria-pressed=true]{background:var(--paper);box-shadow:inset 2px 0 0 var(--laser);font-weight:600;color:var(--ink)}
+.cat-list .c{font-family:var(--mono);font-size:11px;color:var(--muted);flex:none}
+.check{display:flex;align-items:center;gap:10px;font-size:13.5px;cursor:pointer}
+.check input{accent-color:var(--laser);width:15px;height:15px}
+
+.results-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.catalog > div{min-width:0}
+.results-head select{font:12px var(--mono);letter-spacing:1px;border:1px solid var(--line-3);background:var(--white);padding:8px 10px;border-radius:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
+
+/* card (mirrors orphlux.ai/datasets) */
+.card{background:var(--white);border:1px solid var(--line);display:flex;flex-direction:column;cursor:pointer;transition:border-color .15s,transform .15s}
+.card:hover{border-color:var(--ink)}
+.preview{height:118px;background-color:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:20px 20px;border-bottom:1px solid var(--line);color:var(--muted);display:flex;align-items:center;justify-content:center}
+.preview svg{height:100%;width:auto}
+.card-body{padding:20px 22px 18px;display:flex;flex-direction:column;flex:1}
+.code{color:var(--laser);margin:0 0 10px}
+.card h3{font-family:var(--display);font-weight:800;font-size:20px;line-height:1.2;letter-spacing:-.01em;margin:0}
+.variant{font-size:13.5px;color:var(--ink-2);font-weight:600;margin-top:6px}
+.desc{font-size:14px;line-height:1.6;color:var(--body);margin:10px 0 0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.specs{margin:16px 0 0;padding:0}
+.spec{display:flex;justify-content:space-between;gap:14px;border-top:1px solid var(--line-2);padding:9px 0}
+.spec dt{font-family:var(--mono);font-size:10px;letter-spacing:2.2px;color:var(--muted);text-transform:uppercase;flex:none;padding-top:2px}
+.spec dd{margin:0;font-size:13.5px;font-weight:600;text-align:right;overflow-wrap:anywhere}
+.card-actions{display:flex;gap:8px;margin-top:auto;padding-top:14px}
+.badge{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:3px 7px;border:1px solid var(--line-3);color:var(--ink-2);background:var(--paper)}
+.badge.ok{border-color:#9cc3bf;color:#2f6763;background:#eef5f4}
+.badge.wait{border-color:#e2b5c4;color:#8e2347;background:#fbf1f4}
+.empty{background:var(--white);border:1px dashed var(--line-3);padding:48px;text-align:center;color:var(--muted)}
+
+/* drawer */
+.scrim{position:fixed;inset:0;background:rgba(22,25,26,.32);z-index:50;opacity:0;pointer-events:none;transition:opacity .2s}
+.scrim.open{opacity:1;pointer-events:auto}
+.drawer{visibility:hidden;position:fixed;top:0;right:0;bottom:0;width:min(640px,100%);background:var(--white);border-left:1px solid var(--line);z-index:60;transform:translateX(100%);transition:transform .25s ease;display:flex;flex-direction:column}
+.drawer.open{transform:none;visibility:visible}
+.drawer-head{display:flex;justify-content:space-between;align-items:center;padding:16px 24px;border-bottom:1px solid var(--line)}
+.x{background:none;border:1px solid var(--line-3);width:34px;height:34px;cursor:pointer;font-size:18px;line-height:1}
+.drawer-body{overflow:auto;padding:0 0 32px}
+.drawer .preview{height:150px}
+.d-inner{padding:24px 28px 0}
+.drawer h2{font-family:var(--display);font-weight:800;font-size:30px;line-height:1.12;letter-spacing:-.015em;margin:0}
+.d-links{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0 6px}
+.d-sec{margin-top:28px}
+.d-sec .mono{color:var(--muted);display:block;border-bottom:1px solid var(--ink);padding-bottom:8px;margin-bottom:12px}
+.prose{font-size:14.5px;line-height:1.7;color:var(--body)}
+.prose p{margin:0 0 12px}
+.prose ul,.prose ol{margin:0 0 12px;padding-left:20px}
+.prose li{margin:3px 0}
+.prose strong{color:var(--ink)}
+.note{font-size:13px;color:var(--muted);margin-top:8px}
+
+/* contact band + footer */
+.cta{border:1px solid var(--line);background:var(--white);padding:clamp(28px,4vw,48px);display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;margin-bottom:64px}
+.cta h2{font-family:var(--display);font-weight:800;font-size:clamp(26px,3vw,36px);letter-spacing:-.015em;margin:0 0 8px}
+.cta p{margin:0;color:var(--body)}
+footer{border-top:1px solid var(--line);padding:28px 0 36px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;color:var(--muted);font-family:var(--mono);font-size:10px;letter-spacing:1.5px}
+footer a{text-decoration:none;margin-left:18px}
+
+.filter-toggle{display:none}
+@media (max-width:980px){
+  .catalog{grid-template-columns:minmax(0,1fr)}
+  #aside{position:static;max-height:none;display:none}
+  #aside.show{display:block}
+  .filter-toggle{display:inline-flex}
+  .stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media (max-width:640px){
+  .rail{display:none}
+  main{padding-left:0}
+  .nav{left:0;padding:0 16px}
+  .wrap{padding-left:16px;padding-right:16px}
+  .nav-links .hide-sm{display:none}
+  .nav-links{gap:14px}
+  .logo{font-size:20px}
+  .grid{grid-template-columns:minmax(0,1fr)}
+  .tab{padding:10px 12px;font-size:10px;flex:none}
+  .tab .h{display:none}
+  .also{display:block;margin:6px 0 0}
+  .tabs{flex-wrap:nowrap;overflow-x:auto;margin-right:-16px;padding-right:16px;scrollbar-width:none}
+  .nav-links a.btn{padding:7px 12px;font-size:13px;white-space:nowrap}
+  .logo svg{width:26px;height:26px}
+  .logo{gap:8px;font-size:19px}
+  .nav{gap:12px}
+  .stats{margin-top:32px}
+  .d-inner{padding:20px 18px 0}
+  .drawer-head{padding:12px 18px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="rail" aria-hidden="true"><span>ORPHLUX</span><div class="track"><div class="fill" id="railFill"></div></div><span id="railNum">000</span></div>
+
+<header class="nav" id="nav">
+  <a class="logo" href="#top" aria-label="OrphLux data catalog home">
+    <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M0 0h32v12h-7V7H7v18h18v-5h7v12H0z"/><path fill="#bc2f5e" d="M18 13h14v6H18z"/></svg>
+    <span>ORPH<span class="accent">LUX</span></span>
+  </a>
+  <nav class="nav-links" aria-label="Primary">
+    <a class="active hide-sm" href="#catalog">Data Catalog</a>
+    <a class="hide-sm" href="https://www.orphlux.ai" target="_blank" rel="noopener">Website ↗</a>
+    <a class="btn" href="mailto:business@orphlux.ai?subject=OrphLux%20data%20catalog%20inquiry">Contact Us</a>
+  </nav>
+</header>
+
+<main id="top">
+  <section class="wrap hero">
+    <div class="eyebrow">Data Catalog · Generative AI · Physical AI · World Models</div>
+    <h1>OrphLux Data <span class="accent">Catalog</span></h1>
+    <p class="lede">A high-quality multimodal data service provider for World Models and Embodied AI. Browse every dataset and data project in our current list, then open the sample folder directly — or contact us for full access and custom production.</p>
+    <div class="stats" id="stats"></div>
+  </section>
+
+  <section class="wrap" id="catalog">
+    <div class="tabs" role="tablist" id="tabs" aria-label="Data collections"></div>
+    <div class="section-rule mono"><span id="ruleLeft"></span><span id="ruleRight"></span></div>
+
+    <div class="catalog">
+      <aside id="aside" aria-label="Filters">
+        <div class="side-block">
+          <label class="mono side-title" for="q">Search</label>
+          <input class="search" id="q" type="search" placeholder="Name, format, keyword…" autocomplete="off">
+        </div>
+        <div class="side-block">
+          <span class="mono side-title">Type</span>
+          <ul class="cat-list" id="cats"></ul>
+        </div>
+        <div class="side-block">
+          <label class="check"><input type="checkbox" id="hasSample"> Has sample link</label>
+        </div>
+      </aside>
+
+      <div>
+        <div class="results-head">
+          <span><span class="mono" id="count"></span><span class="also" id="also"></span></span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn ghost sm filter-toggle" id="filterToggle" aria-controls="aside" aria-expanded="false">Filters</button>
+            <label class="mono" for="sort" style="color:var(--muted)">Sort</label>
+            <select id="sort"><option value="list">List order</option><option value="az">A → Z</option></select>
+          </div>
+        </div>
+        <div class="grid" id="grid"></div>
+      </div>
+    </div>
+
+    <div class="cta">
+      <div>
+        <h2>Tell us what your model needs to <span class="accent" style="color:var(--laser)">learn.</span></h2>
+        <p>Full datasets, custom collection and production — reach the OrphLux business team.</p>
+      </div>
+      <a class="btn" href="mailto:business@orphlux.ai?subject=OrphLux%20data%20catalog%20inquiry">business@orphlux.ai</a>
+    </div>
+
+    <footer>
+      <span>ORPHLUX · EXPERT DATA FOR NEXT-GEN INTELLIGENCE</span>
+      <span><a href="https://www.linkedin.com/company/orphlux/posts/" target="_blank" rel="noopener">LINKEDIN ↗</a><a href="https://x.com/orphlux16963" target="_blank" rel="noopener">X ↗</a><a href="https://www.youtube.com/@OrphLux" target="_blank" rel="noopener">YOUTUBE ↗</a></span>
+    </footer>
+  </section>
+</main>
+
+<div class="scrim" id="scrim"></div>
+<div class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="dTitle" aria-hidden="true">
+  <div class="drawer-head"><span class="mono" id="dCode"></span><button class="x" id="dClose" aria-label="Close">×</button></div>
+  <div class="drawer-body" id="dBody"></div>
+</div>
+
+<script>
+(async () => {
+const grid0 = document.getElementById('grid');
+grid0.innerHTML = '<div class="empty">Loading catalog…</div>';
+const COLKEYS = ['projects','hq','text','image','video','audio'];
+let ITEMS;
+async function liveRows(){
+  const ctl = new AbortController(); const tm = setTimeout(() => ctl.abort(), 12000);
+  try {
+    const r = await fetch('/api/catalog', {signal: ctl.signal});
+    if (!r.ok) throw new Error(r.status);
+    const j = await r.json();
+    if (!Array.isArray(j.rows) || j.rows.length < 200) throw new Error('bad payload');
+    return j.rows;
+  } finally { clearTimeout(tm); }
+}
+async function snapshotRows(){
+  const parts = await Promise.all(Array.from({length:10}, (_,i) => fetch('d/p'+i+'.bin').then(r => { if(!r.ok) throw new Error(r.status); return r.arrayBuffer(); })));
+  const stream = new Blob(parts).stream().pipeThrough(new DecompressionStream('gzip'));
+  return JSON.parse(await new Response(stream).text());
+}
+try {
+  let rows;
+  try { rows = await liveRows(); window.__catalogSource = 'live'; }
+  catch (e) { rows = await snapshotRows(); window.__catalogSource = 'snapshot'; }
+  const seen = {};
+  const slug = t => String(t||'').toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60);
+  ITEMS = rows.map(r => { const col = COLKEYS[r[0]];
+    let id = [slug(r[2]), slug(r[3])].filter(Boolean).join('--') || col; seen[id] = (seen[id]||0)+1; if (seen[id] > 1) id += '-' + seen[id];
+    return {id, collection: col, category: r[1], name: r[2], variant: r[3], description: r[4], strengths: r[5], volume: r[6], format: r[7], status: r[8], sampleNote: r[9], links: r[10].map(([url,s,label]) => ({url, sample: !!s, label}))}; });
+} catch (e) {
+  grid0.innerHTML = '<div class="empty">The catalog could not be loaded. Please refresh, or contact business@orphlux.ai.</div>';
+  return;
+}
+const MAIL = 'business@orphlux.ai';
+const TABS = [
+  {key:'robotics', label:'Robotics', code:'ROB'},
+  {key:'world', label:'World Model', code:'WM'},
+  {key:'benchmark', label:'Benchmark', code:'BM'},
+  {key:'others', label:'Others', code:'OTH', hint:'Voice / Text / Image / Video'},
+];
+const tabOf = k => TABS.find(c => c.key === k);
+const OTHER_TYPE = {text:'Text', image:'Image & Text', video:'Video', audio:'Voice & Audio'};
+/* which of the four tabs an entry belongs to, and its sidebar group within that tab */
+function classify(it){
+  const cat = it.category || '';
+  if (it.collection === 'projects'){
+    if (cat === 'Physical AI') return ['robotics', it.name];
+    if (cat === 'World Model Training') return ['world', 'World Model Training'];
+    if (['Expert Tasks','Intelligence Questions','Coding Data'].includes(cat)) return ['benchmark', cat];
+    return ['others', cat === 'Multimodal LLM Annotation' ? 'Multimodal Annotation Projects' : (cat || 'Other Projects')];
+  }
+  if (it.collection === 'hq') return ['benchmark', 'Benchmark-targeted Datasets'];
+  if (it.collection === 'video'){
+    if (/embodied intelligence/i.test(it.name)) return ['robotics', 'Embodied Intelligence Video'];
+    if (/world model/i.test(it.name)) return ['world', 'Game Scene Video'];
+  }
+  return ['others', OTHER_TYPE[it.collection] || 'Other'];
+}
+
+/* line-art previews in the orphlux.ai style (laser corner brackets) */
+const BR = '<path d="M58 32V22h16M246 22h16v10M58 148v10h16M246 158h16v-10" stroke="var(--laser)" stroke-width="2"/>';
+const S = inner => `<svg viewBox="0 0 320 180" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="1.2">${inner}</g>${BR}</svg>`;
+const ART = {
+  world: S('<rect x="72" y="35" width="176" height="110" stroke-dasharray="6 5"/><path d="m95 122 42-48 26 28 31-43 32 63M160 26v17M160 137v17M63 90h18M239 90h18"/><path d="M92 53h18M92 61h10"/>'),
+  reason: S('<circle cx="160" cy="38" r="10"/><circle cx="108" cy="94" r="10"/><circle cx="212" cy="94" r="10"/><circle cx="80" cy="148" r="10"/><circle cx="136" cy="148" r="10"/><circle cx="212" cy="148" r="10"/><path d="m153 46-38 40m52-40 38 40m-104 16-17 38m29-38 17 38m82-36v34" stroke-dasharray="4 4"/>'),
+  code: S('<rect x="75" y="38" width="170" height="108"/><path d="M75 60h170m-150 25 15 13-15 13m31 0h34m-50-62h2m8 0h2m8 0h2"/>'),
+  image: S('<rect x="85" y="36" width="100" height="110"/><rect x="135" y="55" width="100" height="92" fill="var(--paper)"/><circle cx="207" cy="78" r="9"/><path d="m151 129 24-32 18 17 12-15 16 30"/>'),
+  gui: S('<rect x="70" y="35" width="180" height="110"/><path d="M70 57h180M88 73h38v51H88zM140 73h91M140 87h65M140 101h76"/><path d="m199 117 22 9-10 5-4 11z" fill="var(--paper)"/>'),
+  video: S('<rect x="60" y="49" width="200" height="92"/><path d="M60 67h200M60 122h200m-179-73v18m25-18v18m25-18v18m25-18v18m25-18v18m25-18v18m25-18v18m-150 55v19m25-19v19m25-19v19m25-19v19m25-19v19m25-19v19m25-19v19"/><path d="m147 79 22 15-22 15z"/>'),
+  audio: S('<path d="M70 90h18m6-22v44m10-60v76m10-50v24m10-58v92m10-70v48m10-30v12m10-44v76m10-56v36m10-24v12m10-50v88m10-62v36m10-20v4m6 0h18"/><path d="M70 150h180" stroke-dasharray="3 5"/>'),
+  text: S('<rect x="96" y="30" width="96" height="124"/><rect x="128" y="44" width="96" height="124" fill="var(--paper)"/><path d="M142 66h68M142 80h68M142 94h50M142 112h68M142 126h60M142 140h40"/>'),
+  embodied: S('<circle cx="160" cy="64" r="26"/><path d="M128 60h64v12h-64zM142 66h8m20 0h8"/><path d="M118 152c4-30 20-46 42-46s38 16 42 46"/><path d="M96 120l22-10 8 18m98-8-22-10-8 18" stroke-dasharray="4 4"/><circle cx="160" cy="64" r="44" stroke-dasharray="2 6"/>'),
+  rubric: S('<rect x="100" y="30" width="120" height="124"/><path d="M134 24h52v14h-52zM118 64l6 6 12-12M146 64h56M118 92l6 6 12-12M146 92h56M118 120h18M146 120h40" />'),
+};
+function artFor(it){
+  const c = (it.category + ' ' + it.name).toLowerCase();
+  if (it.collection === 'projects'){
+    if (c.includes('world model')) return 'world';
+    if (c.includes('physical')) return 'embodied';
+    if (c.includes('coding')) return 'code';
+    if (c.includes('intelligence')) return 'reason';
+    if (c.includes('annotation')) return /video/.test(c) ? 'video' : 'image';
+    if (/ui|render|ppt|image/.test(c)) return 'gui';
+    return 'rubric';
+  }
+  if (it.collection === 'hq'){
+    if (/exam|hle|ale|gdp/.test(c)) return 'reason';
+    if (/ppt/.test(c)) return 'gui';
+    if (/mbench/.test(c)) return 'video';
+    return 'code';
+  }
+  if (it.collection === 'image') return /gui/.test(c) ? 'gui' : 'image';
+  if (it.collection === 'video') return /embodied/.test(c) ? 'embodied' : 'video';
+  return it.collection === 'audio' ? 'audio' : 'text';
+}
+
+/* helpers */
+const esc = s => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const plain = s => String(s||'').replace(/^\s*([*\-•]|\d+[.)])\s+/gm,'').replace(/\s+/g,' ').trim();
+const shortVol = v => { const i = v.indexOf(' ('); return i > 0 ? v.slice(0,i) : v; };
+const samples = it => it.links.filter(l => l.sample);
+const title = it => it.variant ? it.variant : it.name;
+const sub = it => it.variant ? it.name : '';
+
+// stable per-collection codes in list order
+const counters = {};
+ITEMS.forEach(it => { [it._tab, it._group] = classify(it); counters[it._tab] = (counters[it._tab]||0) + 1; it._code = `${tabOf(it._tab).code} · ${String(counters[it._tab]).padStart(2,'0')}`; it._hay = [it.name,it.variant,it.category,it.description,it.strengths,it.format,it.volume].join(' ').toLowerCase(); });
+
+function prose(text){
+  if (!text) return '';
+  const blocks = text.replace(/\r/g,'').split(/\n\s*\n/);
+  return blocks.map(b => {
+    const lines = b.split('\n').map(l => l.trim()).filter(Boolean);
+    if (!lines.length) return '';
+    const isList = lines.every(l => /^([*\-•]|\d+[.)])\s+/.test(l));
+    if (isList && lines.length > 0){
+      const ordered = lines.every(l => /^\d+[.)]\s+/.test(l));
+      const tag = ordered ? 'ol' : 'ul';
+      return `<${tag}>${lines.map(l => `<li>${esc(l.replace(/^([*\-•]|\d+[.)])\s+/,''))}</li>`).join('')}</${tag}>`;
+    }
+    return '<p>' + lines.map(l => {
+      const m = l.match(/^([*\-•])\s+(.*)$/);
+      return m ? '• ' + esc(m[2]) : esc(l);
+    }).join('<br>') + '</p>';
+  }).join('');
+}
+
+/* state */
+const state = { col:'robotics', cat:'', q:'', has:false, sort:'list' };
+function readHash(){
+  const h = new URLSearchParams(location.hash.slice(1));
+  if (h.get('c') && tabOf(h.get('c'))) state.col = h.get('c');
+  if (h.get('cat')) state.cat = h.get('cat');
+  return h.get('d');
+}
+
+const $ = id => document.getElementById(id);
+function inCol(it){ return it._tab === state.col; }
+const qWords = () => state.q.trim().toLowerCase().split(/\s+/).filter(Boolean);
+const matches = (it, q) => (!state.has || samples(it).length) && q.every(w => it._hay.includes(w));
+function filtered(){
+  const q = qWords();
+  let out = ITEMS.filter(it => inCol(it) && (!state.cat || it._group === state.cat) && matches(it, q));
+  if (state.sort === 'az') out = [...out].sort((a,b) => title(a).localeCompare(title(b)));
+  return out;
+}
+
+function renderStats(){
+  const n = k => ITEMS.filter(i => i._tab === k).length;
+  const cells = [
+    [ITEMS.length, 'Datasets & projects listed'],
+    [n('robotics') + n('world'), 'Robotics & world-model sets'],
+    [n('benchmark'), 'Benchmark & evaluation sets'],
+  ];
+  $('stats').innerHTML = cells.map(([v,l]) => `<div class="stat"><b>${v}</b><span class="mono">${l}</span></div>`).join('');
+}
+
+function renderTabs(){
+  $('tabs').innerHTML = TABS.map((c,i) => {
+    const n = ITEMS.filter(it => it._tab === c.key).length;
+    return `<button class="tab" role="tab" aria-selected="${state.col===c.key}" data-col="${c.key}"${c.hint ? ` title="${esc(c.hint)}"` : ''}>${String(i+1).padStart(2,'0')} / ${esc(c.label)}${c.hint ? ` <span class="h">(${esc(c.hint)})</span>` : ''} <span class="n">${n}</span></button>`;
+  }).join('');
+}
+
+function renderCats(){
+  const pool = ITEMS.filter(inCol);
+  const counts = new Map();
+  pool.forEach(it => { counts.set(it._group, (counts.get(it._group)||0) + 1); });
+  const rows = [['', 'All in ' + tabOf(state.col).label, pool.length], ...[...counts.entries()].map(([k,v]) => [k,k,v])];
+  if (state.cat && !counts.has(state.cat)) state.cat = '';
+  $('cats').innerHTML = rows.map(([k,label,v]) => `<li><button data-cat="${esc(k)}" aria-pressed="${state.cat===k}"><span>${esc(label)}</span><span class="c">${v}</span></button></li>`).join('');
+}
+
+function card(it){
+  const s = samples(it);
+  const specs = [];
+  if (it._group !== it.name) specs.push(['Type', it._group]);
+  if (it.category && it.category !== it.name && it.category !== it._group) specs.push(['Category', it.category]);
+  if (it.volume) specs.push([it.collection==='projects'||it.collection==='hq' ? 'Volume' : 'Volume', shortVol(it.volume)]);
+  if (it.format) specs.push(['Format', it.format]);
+  const desc = plain(it.description) || (it.links.some(l=>!l.sample) ? 'See the project overview document for full details.' : plain(it.strengths));
+  return `<article class="card" data-id="${it.id}" tabindex="0" aria-label="${esc(title(it))}">
+    <div class="preview" aria-hidden="true">${ART[artFor(it)]}</div>
+    <div class="card-body">
+      <p class="mono code">${esc(it._code)}</p>
+      <h3>${esc(title(it))}</h3>
+      ${sub(it) ? `<div class="variant">${esc(sub(it))}</div>` : ''}
+      ${desc ? `<p class="desc">${esc(desc)}</p>` : ''}
+      <dl class="specs">${specs.map(([k,v,raw]) => `<div class="spec"><dt>${esc(k)}</dt><dd>${raw ? v : esc(v)}</dd></div>`).join('')}</dl>
+      <div class="card-actions">
+        ${s.length ? `<a class="btn sm" href="${esc(s[0].url)}" target="_blank" rel="noopener" data-stop>View sample ↗</a>` : `<a class="btn sm" href="${mailto(it)}" data-stop>Request sample</a>`}
+        <button class="btn ghost sm" data-open>Details</button>
+      </div>
+    </div>
+  </article>`;
+}
+function mailto(it){
+  const subj = `Dataset inquiry: ${it.variant ? it.name + ' — ' + it.variant : it.name}`;
+  return `mailto:${MAIL}?subject=${encodeURIComponent(subj)}`;
+}
+
+function render(){
+  renderTabs(); renderCats();
+  const list = filtered();
+  const c = tabOf(state.col);
+  $('ruleLeft').textContent = `${String(TABS.indexOf(c)+1).padStart(2,'0')} / ${c.label}`;
+  $('ruleRight').textContent = state.cat ? state.cat : 'All types';
+  $('count').textContent = `${list.length} ${list.length===1?'entry':'entries'}`;
+  const q = qWords();
+  const elsewhere = q.length ? TABS.filter(t => t.key !== state.col).map(t => [t, ITEMS.filter(it => it._tab === t.key && matches(it, q)).length]).filter(([,n]) => n) : [];
+  $('also').innerHTML = elsewhere.length ? 'Also in: ' + elsewhere.map(([t,n]) => `<button data-col="${t.key}">${esc(t.label)} (${n})</button>`).join(' · ') : '';
+  $('grid').innerHTML = list.length ? list.map(card).join('') : `<div class="empty">No entries match these filters. <br><br><button class="btn ghost sm" id="reset">Clear filters</button></div>`;
+  const h = new URLSearchParams();
+  if (state.col !== TABS[0].key) h.set('c', state.col);
+  if (state.cat) h.set('cat', state.cat);
+  if (openId) h.set('d', openId);
+  history.replaceState(null, '', h.toString() ? '#' + h.toString() : location.pathname);
+}
+
+/* drawer */
+let openId = null, lastFocus = null;
+function openDrawer(id){
+  const it = ITEMS.find(i => i.id === id); if (!it) return;
+  openId = id; lastFocus = document.activeElement;
+  if (it._tab !== state.col){ state.col = it._tab; state.cat = ''; }
+  const specs = [['Collection', tabOf(it._tab).label], ['Type', it._group]];
+  if (it.category && it.category !== it._group) specs.push(['Category', it.category]);
+  if (it.variant) specs.push(['Dataset', it.name]);
+  if (it.volume) specs.push(['Volume / Availability', it.volume]);
+  if (it.format) specs.push(['Format', it.format]);
+  const links = it.links.map(l => `<a class="btn ${l.sample?'':'ghost'} sm" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`).join('');
+  $('dCode').textContent = `${it._code} · ${tabOf(it._tab).label}`;
+  $('dBody').innerHTML = `
+    <div class="preview">${ART[artFor(it)]}</div>
+    <div class="d-inner">
+      <h2 id="dTitle">${esc(title(it))}</h2>
+      ${sub(it) ? `<div class="variant" style="font-size:15px">${esc(sub(it))}</div>` : ''}
+      <div class="d-links">${links}<a class="btn ghost sm" href="${mailto(it)}">Request full dataset</a></div>
+      ${it.sampleNote ? `<p class="note">${esc(it.sampleNote)}</p>` : ''}
+      <div class="d-sec"><span class="mono">Specifications</span><dl class="specs" style="margin:0">${specs.map(([k,v]) => `<div class="spec"><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl></div>
+      ${it.description ? `<div class="d-sec"><span class="mono">Overview</span><div class="prose">${prose(it.description)}</div></div>` : ''}
+      ${it.strengths ? `<div class="d-sec"><span class="mono">Data production strengths</span><div class="prose">${prose(it.strengths)}</div></div>` : ''}
+    </div>`;
+  $('drawer').classList.add('open'); $('drawer').setAttribute('aria-hidden','false');
+  $('scrim').classList.add('open'); document.body.style.overflow = 'hidden';
+  $('dBody').scrollTop = 0; $('dClose').focus();
+  render();
+}
+function closeDrawer(){
+  openId = null;
+  $('drawer').classList.remove('open'); $('drawer').setAttribute('aria-hidden','true');
+  $('scrim').classList.remove('open'); document.body.style.overflow = '';
+  render(); if (lastFocus && document.contains(lastFocus)) lastFocus.focus();
+}
+
+/* events */
+$('tabs').addEventListener('click', e => { const b = e.target.closest('[data-col]'); if (!b) return; state.col = b.dataset.col; state.cat = ''; render(); });
+$('also').addEventListener('click', e => { const b = e.target.closest('[data-col]'); if (!b) return; state.col = b.dataset.col; state.cat = ''; render(); });
+$('cats').addEventListener('click', e => { const b = e.target.closest('[data-cat]'); if (!b) return; state.cat = b.dataset.cat; render(); });
+let t; $('q').addEventListener('input', e => { clearTimeout(t); t = setTimeout(() => { state.q = e.target.value; render(); }, 120); });
+$('hasSample').addEventListener('change', e => { state.has = e.target.checked; render(); });
+$('sort').addEventListener('change', e => { state.sort = e.target.value; render(); });
+$('filterToggle').addEventListener('click', e => { const a = $('aside'); a.classList.toggle('show'); e.currentTarget.setAttribute('aria-expanded', a.classList.contains('show')); });
+$('grid').addEventListener('click', e => {
+  if (e.target.id === 'reset'){ state.cat=''; state.q=''; state.has=false; $('q').value=''; $('hasSample').checked=false; render(); return; }
+  if (e.target.closest('[data-stop]')) return;
+  const c = e.target.closest('.card'); if (c) openDrawer(c.dataset.id);
+});
+$('grid').addEventListener('keydown', e => { if ((e.key==='Enter'||e.key===' ') && e.target.classList.contains('card')){ e.preventDefault(); openDrawer(e.target.dataset.id); } });
+$('dClose').addEventListener('click', closeDrawer);
+$('scrim').addEventListener('click', closeDrawer);
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && openId) closeDrawer(); });
+
+/* scroll progress (rail + nav line), as on orphlux.ai */
+function onScroll(){
+  const max = document.documentElement.scrollHeight - innerHeight;
+  const p = max > 0 ? scrollY / max : 0;
+  $('nav').style.setProperty('--prog', (p*100).toFixed(1) + '%');
+  $('railFill').style.height = (p*100).toFixed(1) + '%';
+  $('railNum').textContent = String(Math.round(p*100)).padStart(3,'0');
+}
+addEventListener('scroll', onScroll, {passive:true});
+
+const startId = readHash();
+renderStats(); render(); onScroll();
+if (startId) openDrawer(startId);
+})();
+</script>
+</body>
+</html>

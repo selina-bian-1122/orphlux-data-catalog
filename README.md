@@ -16,8 +16,12 @@ https://orphlux-data-catalog.vercel.app
 - **`index.html`:** single-file front end (no build step). It loads `/api/catalog`,
   and on failure falls back to the bundled snapshot in `d/p0.bin … p9.bin`
   (gzip JSON split into 10 parts). `window.__catalogSource` is `live` or `snapshot`.
-- **Tabs:** Robotics · World Model · Benchmark · Others. The mapping from sheet
-  tabs/categories is in `classify()` in `index.html`.
+- **Layout:** three tabs, each with sidebar types (mapping lives in `classify()` in `index.html`):
+  - **For Generative AI** — Coding Data · STEM Data · Expert Data · Benchmark Data · Multimodal Data (Image / Video / Audio / Multimodal Data Annotation) · Others
+  - **For Physical AI** — Ego Data · UMI Data · Teleoperation Data · Others
+  - **For World Model**
+  Text datasets are split into Coding / STEM / Expert / Others by keywords in their names
+  (`RX_EXPERT`, `RX_STEM`); anything unmatched lands in Others.
 
 ## Files
 

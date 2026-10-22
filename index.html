@@ -60,7 +60,7 @@ main{padding-left:40px}
 h1{font-family:var(--display);font-weight:800;font-size:clamp(44px,7vw,84px);line-height:1;letter-spacing:-.025em;margin:26px 0 22px}
 h1 .accent,h2 .accent{color:var(--laser)}
 .lede{font-size:17px;line-height:1.65;color:var(--body);max-width:760px;margin:0}
-.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid var(--ink);margin-top:44px;max-width:980px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--ink);margin-top:44px;max-width:980px}
 .stat{padding:18px 18px 4px 0}
 .stat b{display:block;font-family:var(--display);font-weight:800;font-size:clamp(28px,3.4vw,40px);letter-spacing:-.02em}
 .stat span{color:var(--muted)}
@@ -88,6 +88,8 @@ h1 .accent,h2 .accent{color:var(--laser)}
 .cat-list button{width:100%;display:flex;justify-content:space-between;gap:10px;background:none;border:0;padding:7px 8px;text-align:left;cursor:pointer;font-size:13.5px;line-height:1.35;color:var(--ink-2)}
 .cat-list button:hover{background:var(--paper)}
 .cat-list button[aria-pressed=true]{background:var(--paper);box-shadow:inset 2px 0 0 var(--laser);font-weight:600;color:var(--ink)}
+.cat-list li.sub button{padding-left:24px;font-size:13px}
+.cat-list li.sub button span:first-child::before{content:"– ";color:var(--muted)}
 .cat-list .c{font-family:var(--mono);font-size:11px;color:var(--muted);flex:none}
 .check{display:flex;align-items:center;gap:10px;font-size:13.5px;cursor:pointer}
 .check input{accent-color:var(--laser);width:15px;height:15px}
@@ -151,7 +153,7 @@ footer a{text-decoration:none;margin-left:18px}
   #aside{position:static;max-height:none;display:none}
   #aside.show{display:block}
   .filter-toggle{display:inline-flex}
-  .stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media (max-width:640px){
   .rail{display:none}
@@ -289,29 +291,44 @@ try {
 }
 const MAIL = 'business@orphlux.ai';
 const TABS = [
-  {key:'robotics', label:'Robotics', code:'ROB'},
-  {key:'world', label:'World Model', code:'WM'},
-  {key:'benchmark', label:'Benchmark', code:'BM'},
-  {key:'others', label:'Others', code:'OTH', hint:'Voice / Text / Image / Video'},
+  {key:'genai', label:'For Generative AI', code:'GEN', groups:['Coding Data','STEM Data','Expert Data','Benchmark Data','Multimodal Data','Others']},
+  {key:'physical', label:'For Physical AI', code:'PHY', groups:['Ego Data','UMI Data','Teleoperation Data','Others']},
+  {key:'world', label:'For World Model', code:'WM', groups:['World Model Data']},
 ];
+const SUBS = {'Multimodal Data':['Image','Video','Audio','Multimodal Data Annotation']};
+const LEGACY_TAB = {robotics:'physical', benchmark:'genai', others:'genai'};
 const tabOf = k => TABS.find(c => c.key === k);
-const OTHER_TYPE = {text:'Text', image:'Image & Text', video:'Video', audio:'Voice & Audio'};
-/* which of the four tabs an entry belongs to, and its sidebar group within that tab */
+const RX_EXPERT = /medical|legal|judicial|\blaw\b|financ|patent|industry report|professional/i;
+const RX_STEM = /question bank|math|k12|textbook|teaching material|quizlet|exam|\bcot\b|chain of thought|reasoning|academic|journal|paper/i;
+/* -> [tab, group, sub]: which tab an entry sits in, its sidebar group, and (for Multimodal Data) its sub-type */
 function classify(it){
-  const cat = it.category || '';
+  const cat = it.category || '', name = it.name || '';
   if (it.collection === 'projects'){
-    if (cat === 'Physical AI') return ['robotics', it.name];
-    if (cat === 'World Model Training') return ['world', 'World Model Training'];
-    if (['Expert Tasks','Intelligence Questions','Coding Data'].includes(cat)) return ['benchmark', cat];
-    return ['others', cat === 'Multimodal LLM Annotation' ? 'Multimodal Annotation Projects' : (cat || 'Other Projects')];
+    if (cat === 'Physical AI') return ['physical', tabOf('physical').groups.includes(name) ? name : 'Others'];
+    if (cat === 'World Model Training') return ['world', 'World Model Data'];
+    if (cat === 'Coding Data') return ['genai', 'Coding Data'];
+    if (cat === 'Expert Tasks') return ['genai', /\bstem\b|scientist|microscopy/i.test(name) ? 'STEM Data' : 'Expert Data'];
+    if (cat === 'Intelligence Questions') return ['genai', 'Benchmark Data'];
+    if (cat === 'Multimodal LLM Annotation') return ['genai', 'Multimodal Data', 'Multimodal Data Annotation'];
+    return ['genai', 'Others'];
   }
-  if (it.collection === 'hq') return ['benchmark', 'Benchmark-targeted Datasets'];
+  if (it.collection === 'hq') return ['genai', 'Benchmark Data'];
+  if (it.collection === 'text'){
+    if (/code|programming/i.test(name)) return ['genai', 'Coding Data'];
+    if (RX_EXPERT.test(name)) return ['genai', 'Expert Data'];
+    if (RX_STEM.test(name)) return ['genai', 'STEM Data'];
+    return ['genai', 'Others'];
+  }
+  if (it.collection === 'image') return ['genai', 'Multimodal Data', 'Image'];
+  if (it.collection === 'audio') return ['genai', 'Multimodal Data', 'Audio'];
   if (it.collection === 'video'){
-    if (/embodied intelligence/i.test(it.name)) return ['robotics', 'Embodied Intelligence Video'];
-    if (/world model/i.test(it.name)) return ['world', 'Game Scene Video'];
+    if (/embodied intelligence/i.test(name)) return ['physical', 'Others'];
+    if (/world model/i.test(name)) return ['world', 'World Model Data'];
+    return ['genai', 'Multimodal Data', 'Video'];
   }
-  return ['others', OTHER_TYPE[it.collection] || 'Other'];
+  return ['genai', 'Others'];
 }
+const typeLabel = it => it._sub ? `${it._group} · ${it._sub}` : it._group;
 
 /* line-art previews in the orphlux.ai style (laser corner brackets) */
 const BR = '<path d="M58 32V22h16M246 22h16v10M58 148v10h16M246 158h16v-10" stroke="var(--laser)" stroke-width="2"/>';
@@ -358,9 +375,14 @@ const samples = it => it.links.filter(l => l.sample);
 const title = it => it.variant ? it.variant : it.name;
 const sub = it => it.variant ? it.name : '';
 
-// stable per-collection codes in list order
+// classify, then order each tab by its outline (group, then sub-type, then sheet order) and number cards in that order
+ITEMS.forEach((it, i) => { [it._tab, it._group, it._sub] = classify(it); it._sub = it._sub || ''; it._i = i;
+  it._hay = [it.name,it.variant,it.category,it.description,it.strengths,it.format,it.volume].join(' ').toLowerCase(); });
+const rank = it => { const g = tabOf(it._tab).groups.indexOf(it._group); const sb = (SUBS[it._group] || []).indexOf(it._sub);
+  return [TABS.findIndex(t => t.key === it._tab), g < 0 ? 99 : g, sb < 0 ? 99 : sb, it._i]; };
+ITEMS.sort((a, b) => { const x = rank(a), y = rank(b); for (let k = 0; k < x.length; k++) if (x[k] !== y[k]) return x[k] - y[k]; return 0; });
 const counters = {};
-ITEMS.forEach(it => { [it._tab, it._group] = classify(it); counters[it._tab] = (counters[it._tab]||0) + 1; it._code = `${tabOf(it._tab).code} · ${String(counters[it._tab]).padStart(2,'0')}`; it._hay = [it.name,it.variant,it.category,it.description,it.strengths,it.format,it.volume].join(' ').toLowerCase(); });
+ITEMS.forEach(it => { counters[it._tab] = (counters[it._tab]||0) + 1; it._code = `${tabOf(it._tab).code} · ${String(counters[it._tab]).padStart(2,'0')}`; });
 
 function prose(text){
   if (!text) return '';
@@ -382,10 +404,11 @@ function prose(text){
 }
 
 /* state */
-const state = { col:'robotics', cat:'', q:'', has:false, sort:'list' };
+const state = { col:'genai', cat:'', q:'', has:false, sort:'list' };
 function readHash(){
   const h = new URLSearchParams(location.hash.slice(1));
-  if (h.get('c') && tabOf(h.get('c'))) state.col = h.get('c');
+  const c = LEGACY_TAB[h.get('c')] || h.get('c');
+  if (c && tabOf(c)) state.col = c;
   if (h.get('cat')) state.cat = h.get('cat');
   return h.get('d');
 }
@@ -396,7 +419,7 @@ const qWords = () => state.q.trim().toLowerCase().split(/\s+/).filter(Boolean);
 const matches = (it, q) => (!state.has || samples(it).length) && q.every(w => it._hay.includes(w));
 function filtered(){
   const q = qWords();
-  let out = ITEMS.filter(it => inCol(it) && (!state.cat || it._group === state.cat) && matches(it, q));
+  let out = ITEMS.filter(it => inCol(it) && (!state.cat || it._group === state.cat || it._group + '/' + it._sub === state.cat) && matches(it, q));
   if (state.sort === 'az') out = [...out].sort((a,b) => title(a).localeCompare(title(b)));
   return out;
 }
@@ -405,8 +428,9 @@ function renderStats(){
   const n = k => ITEMS.filter(i => i._tab === k).length;
   const cells = [
     [ITEMS.length, 'Datasets & projects listed'],
-    [n('robotics') + n('world'), 'Robotics & world-model sets'],
-    [n('benchmark'), 'Benchmark & evaluation sets'],
+    [n('genai'), 'For Generative AI'],
+    [n('physical'), 'For Physical AI'],
+    [n('world'), 'For World Model'],
   ];
   $('stats').innerHTML = cells.map(([v,l]) => `<div class="stat"><b>${v}</b><span class="mono">${l}</span></div>`).join('');
 }
@@ -419,19 +443,24 @@ function renderTabs(){
 }
 
 function renderCats(){
-  const pool = ITEMS.filter(inCol);
-  const counts = new Map();
-  pool.forEach(it => { counts.set(it._group, (counts.get(it._group)||0) + 1); });
-  const rows = [['', 'All in ' + tabOf(state.col).label, pool.length], ...[...counts.entries()].map(([k,v]) => [k,k,v])];
-  if (state.cat && !counts.has(state.cat)) state.cat = '';
-  $('cats').innerHTML = rows.map(([k,label,v]) => `<li><button data-cat="${esc(k)}" aria-pressed="${state.cat===k}"><span>${esc(label)}</span><span class="c">${v}</span></button></li>`).join('');
+  const tab = tabOf(state.col), pool = ITEMS.filter(inCol);
+  const cnt = k => pool.filter(it => it._group === k || it._group + '/' + it._sub === k).length;
+  const rows = [['', 'All in ' + tab.label.replace(/^For /,''), pool.length, 0]];
+  const groups = [...tab.groups, ...new Set(pool.map(it => it._group).filter(g => !tab.groups.includes(g)))];
+  if (groups.length > 1) groups.forEach(g => {
+    if (!cnt(g)) return;
+    rows.push([g, g, cnt(g), 0]);
+    (SUBS[g] || []).forEach(sb => { const k = g + '/' + sb; if (cnt(k)) rows.push([k, sb, cnt(k), 1]); });
+  });
+  if (state.cat && !rows.some(r => r[0] === state.cat)) state.cat = '';
+  $('cats').innerHTML = rows.map(([k,label,v,lvl]) => `<li${lvl ? ' class="sub"' : ''}><button data-cat="${esc(k)}" aria-pressed="${state.cat===k}"><span>${esc(label)}</span><span class="c">${v}</span></button></li>`).join('');
 }
 
 function card(it){
   const s = samples(it);
   const specs = [];
-  if (it._group !== it.name) specs.push(['Type', it._group]);
-  if (it.category && it.category !== it.name && it.category !== it._group) specs.push(['Category', it.category]);
+  if (it._group !== it.name) specs.push(['Type', typeLabel(it)]);
+  if (it.category && ![it.name, it._group, it._sub].includes(it.category)) specs.push(['Category', it.category]);
   if (it.volume) specs.push([it.collection==='projects'||it.collection==='hq' ? 'Volume' : 'Volume', shortVol(it.volume)]);
   if (it.format) specs.push(['Format', it.format]);
   const desc = plain(it.description) || (it.links.some(l=>!l.sample) ? 'See the project overview document for full details.' : plain(it.strengths));
@@ -460,7 +489,7 @@ function render(){
   const list = filtered();
   const c = tabOf(state.col);
   $('ruleLeft').textContent = `${String(TABS.indexOf(c)+1).padStart(2,'0')} / ${c.label}`;
-  $('ruleRight').textContent = state.cat ? state.cat : 'All types';
+  $('ruleRight').textContent = state.cat ? state.cat.replace('/', ' · ') : 'All types';
   $('count').textContent = `${list.length} ${list.length===1?'entry':'entries'}`;
   const q = qWords();
   const elsewhere = q.length ? TABS.filter(t => t.key !== state.col).map(t => [t, ITEMS.filter(it => it._tab === t.key && matches(it, q)).length]).filter(([,n]) => n) : [];
@@ -479,8 +508,8 @@ function openDrawer(id){
   const it = ITEMS.find(i => i.id === id); if (!it) return;
   openId = id; lastFocus = document.activeElement;
   if (it._tab !== state.col){ state.col = it._tab; state.cat = ''; }
-  const specs = [['Collection', tabOf(it._tab).label], ['Type', it._group]];
-  if (it.category && it.category !== it._group) specs.push(['Category', it.category]);
+  const specs = [['Collection', tabOf(it._tab).label.replace(/^For /,'')], ['Type', typeLabel(it)]];
+  if (it.category && ![it._group, it._sub].includes(it.category)) specs.push(['Category', it.category]);
   if (it.variant) specs.push(['Dataset', it.name]);
   if (it.volume) specs.push(['Volume / Availability', it.volume]);
   if (it.format) specs.push(['Format', it.format]);

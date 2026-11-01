@@ -23,6 +23,11 @@ https://orphlux-data-catalog.vercel.app
   Text datasets are split into Coding / STEM / Expert / Others by keywords in their names
   (`RX_EXPERT`, `RX_STEM`); anything unmatched lands in Others.
 
+- **Descriptions:** a card's description comes from the sheet's description cell. A cell that only
+  contains an attached file name (e.g. `Spec.docx`) is ignored. When the cell is empty, the page uses a
+  summary written from that entry's overview document (the `DESC` table near the top of the script in
+  `index.html`); otherwise the card shows no description. Typing a description into the sheet always wins.
+
 ## Files
 
 | Path | Purpose |

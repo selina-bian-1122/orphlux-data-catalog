@@ -260,6 +260,14 @@ footer a{text-decoration:none;margin-left:18px}
 const grid0 = document.getElementById('grid');
 grid0.innerHTML = '<div class="empty">Loading catalog…</div>';
 const COLKEYS = ['projects','hq','text','image','video','audio'];
+/* Descriptions written from each entry's overview document, used only when the sheet's description cell is empty
+   (text typed into the sheet always wins). Keyed by entry id (slug of name + variant). */
+const DESC = {
+  'movement-and-combat-data': 'About 4,600 hours of gamepad gameplay recorded across eight action and open-world RPGs, including Elden Ring, Black Myth: Wukong, Red Dead Redemption 2, Cyberpunk 2077 and The Witcher 3. Each 30–60 minute session is captured at 1080p / 30 fps with original audio and no overlays or watermarks, and mixes free exploration, regular look-backs, combat and environmental interaction.\n\nEvery recording ships with millisecond-synchronized gamepad, keyboard and mouse input logs, and actions are labelled by control complexity, from idle through simple and complex movement to compound actions such as attacking while moving.',
+  'walking-stopping-s-shaped-movement-and-replay-data': '480 hours of gamepad navigation recordings from Elden Ring, Hogwarts Legacy and Red Dead Redemption 2 (160 hours each), in 15–30 minute sessions at 1080p / 30 fps.\n\nFootage covers straight-line and S-shaped movement, circling objects, stopping to rotate the camera and regular look-backs, with combat, interaction and the in-game HUD excluded. Each video comes with millisecond-synchronized input logs.',
+  'movement-revisit-combat-data': '221 hours of open-world action gameplay from Ghost of Tsushima, recorded in 30–40 minute sessions at 1080p / 30 fps with the in-game HUD turned off.\n\nCovers directional and complex movement (jumping, rolling) together with combat and interaction, with millisecond-synchronized gamepad, keyboard and mouse input logs for every recording.',
+  'movement-revisit-data': '671 hours of exploration gameplay from Grounded 2, Palworld and Arknights: Endfield, played with a gamepad or keyboard and mouse in 30–40 minute sessions at 1080p / 30 fps.\n\nFocuses on directional and complex movement (jumping, rolling) with combat, interaction and the in-game HUD excluded, and includes millisecond-synchronized input logs for every recording.',
+};
 let ITEMS;
 async function liveRows(){
   const ctl = new AbortController(); const tm = setTimeout(() => ctl.abort(), 12000);
@@ -285,6 +293,12 @@ try {
   ITEMS = rows.map(r => { const col = COLKEYS[r[0]];
     let id = [slug(r[2]), slug(r[3])].filter(Boolean).join('--') || col; seen[id] = (seen[id]||0)+1; if (seen[id] > 1) id += '-' + seen[id];
     return {id, collection: col, category: r[1], name: r[2], variant: r[3], description: r[4], strengths: r[5], volume: r[6], format: r[7], status: r[8], sampleNote: r[9], links: r[10].map(([url,s,label]) => ({url, sample: !!s, label}))}; });
+  /* a description cell that only holds an attached file name is not a description */
+  const isFileName = d => /^[^\n]{0,150}\.(docx?|pdf|xlsx?|pptx?|rar|zip)$/i.test(String(d||'').trim());
+  ITEMS.forEach(it => {
+    if (isFileName(it.description)) it.description = '';
+    if (!it.description && DESC[it.id]) it.description = DESC[it.id];
+  });
 } catch (e) {
   grid0.innerHTML = '<div class="empty">The catalog could not be loaded. Please refresh, or contact business@orphlux.ai.</div>';
   return;
@@ -463,7 +477,7 @@ function card(it){
   if (it.category && ![it.name, it._group, it._sub].includes(it.category)) specs.push(['Category', it.category]);
   if (it.volume) specs.push([it.collection==='projects'||it.collection==='hq' ? 'Volume' : 'Volume', shortVol(it.volume)]);
   if (it.format) specs.push(['Format', it.format]);
-  const desc = plain(it.description) || (it.links.some(l=>!l.sample) ? 'See the project overview document for full details.' : plain(it.strengths));
+  const desc = plain(it.description) || plain(it.strengths);
   return `<article class="card" data-id="${it.id}" tabindex="0" aria-label="${esc(title(it))}">
     <div class="preview" aria-hidden="true">${ART[artFor(it)]}</div>
     <div class="card-body">
